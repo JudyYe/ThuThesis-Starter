@@ -1,0 +1,171 @@
+\chapter{基于有监督字典学习的OCT图像病态定位算法}
+
+\section{方法概述} % (fold)
+\label{sec:methodOverview}
+sadf 
+% section _ (end)
+
+% put to implementation detail
+\section{数据预处理}
+\label{sec:Preprocessing}
+
+\section{基于PCA降维提取的特征图像}
+\label{sec:pcaDR}
+    \subsection{动机}
+    把图像向量化是表达图像的基本手段。最直观的方法是在像素空间，直接把一个$N \times M$的图像，拉伸成$N\cdot M$维的 向量。但是，这种直观的方法，在高维空间中却会出现以下两个主要问题：
+    \begin{enumerate}
+        \item 计算量过大
+        \item 在高维空间中，常用的距离，如欧式距离等，会降低识别性。
+    \end{enumerate}
+    有许多工作表明%\cite{dr-pca}
+    降维是提高图像特征表达性能，即提高识别率的有效方法。
+    将降维方法应用于识别领域有一定的生物学基础。
+
+    \subsection{PCA方法概述}
+    主成分分析，(Principal Components Analysis，PCA)是一种非常直观但有效的降维手段。它寻找的是一个正交线性投影$R$，原来的空间通过$R$投影到低维空间上，使得数据在低维空间上的坐标轴方向上方差最大，且方差大小按照低维空间中坐标轴的顺序依次递减。它的数学表达如下，若$X \in \mathbb{R}^{N\times p}  $是一组观察数据，每一行代表一次观察，每次观察有p个变量。且$X$中每个变量的算术均值等于0。$R \in \mathbb{R} ^{p \times m}, (m \leqslant p) $ 是投影变换，将p维空间投影到m维空间中，投影后得到$\hat{X} = X\cdot R \in \mathbb{R}^{N \ times m}$ 。$R = (r_1, r_2, \dots, r_m)$ 中 $r_i$ 满足 $ \|r_i\| = 1$ 且 $r_i \cdot r_j = 0$。从另一个几何空间的角度，也可以把$r_i$理解为投影后空间第i维坐标轴在原空间中的方向。根据定义，R的第1维坐标轴方向$r_{(1)}$满足
+    \begin{equation}
+    \label{eq:pcar1}
+    \begin{split}
+        r_{1} & = \mathop{\arg\max}_{\|r\|=1} (\sum_i(\hat{x} _1)^2_{i} \\
+        & = \mathop{\arg\max}_{\|r\| = 1}(\sum_i(x_{(i)}\cdot r)^2) \\
+        & = \mathop{\arg\max} _{\|r\|=1} \|Xr\|^2 \\
+        & = \mathop{arg\max}_{\|r\|= 1} (r^TX^TXw) \\
+        & = \mathop{\arg\max} (\frac{r^TX^TXr}{r^Tr}) 
+    \end{split}
+    \end{equation}
+    这是雷诺公式\cite{rayleigh}的形式，由线性代数的知识我们知道，$r_1$就是对称矩阵$X^TX$的最大特征值所对应的特征向量的方向。对于$r_i, i > 1$的情况，在求出第$k-1$维坐标轴方向后，第$k$维坐标轴的方向为减去前面$s-1$维后，方差最大的方向，即
+    \begin{equation}
+    \begin{split}
+        X^{(s)} = = X - \sum^{k - 1}_{s = 1} Xr_{(s)}r_{(s)}^T
+    \end{split}    
+    \end{equation}
+    后，重新带入~(\ref{eq:pcar1})，得到第k维的方向向量。
+
+    从PCA的定义出发，可以得出计算R的理论方法，并且我们发现，$R = (r_1, r_2, \dots r_m)$ 就是 $X^T X$的特征值从大到小排列的前m个特征值所对应的特征向量。
+
+    \subsection{PCA去相关性}
+    但是，在具体实现中，PCA的方法是由奇异值分解得到的。下面我们将证明奇异值分解与以上方法等价：
+    
+    考察投影后的协方差，也就是$X$经过$R$投影后，投影在$r_i$和$r_j$ 方向上变量的关系。
+    \begin{equation}
+    \begin{split}
+        \hat{x_i} \cdot \hat{x_j} & = (Xr_i)^T \cdot (Xr_j) \\
+        & = r_i^T X^T X r_j \\
+        & = r_i^T\cdot(X^T X r_j) \\
+        & = r_i^T(\lambda_j r_j) \\
+        & = \lambda_j r_i^T r_j 
+    \end{split}
+    \end{equation}
+    由$R$的正交性可以得到，当$i \ne j$时，$\hat{x_i} \hat{x_j} = 0$，因此新投影的$\hat{X}$其实是一组相互无关的m个变量。相比于像素空间中，每个像素点的取值与其它位置的像素点都是高度相关的，它们的耦合程度很大，这会十分影响分类器学习后验概率的性能。因此，PCA作为一种很好的去相关性的方法，把高维空间中高度有关的变量投影到低维空间中互相独立的变量空间，这为提高分类器的准确性提供了很好的保障。 \textbf{做对比试验}
+ 
+    \subsection{PCA重建}
+    从另一个角度理解，主成分分析也可以被理解为在特征向量支撑的子空间上，寻找与原数据点在最小二成意义上最近的投影。这种最小二成回归的特性可以被用来恢复源空间中的数据点。
+
+    \begin{equation}
+    reconstruct(X) = X \cdot R \cdot R^T        
+    \end{equation}
+
+    得到的$reconstruct(X)$被恢复到了原来的坐标系下，且落在了特征向量所张成的平面上。
+    
+    \subsection{PCA计算特征图像}
+        ~\cite{turk1991eigenfaces}提出使用主成分分析的方法来提取人脸图像特征， 进行人脸识别， 相较于该方法之前的工作， 取得了较好的效果。我们发现， 在眼底光学相干成像的图像中， 这个任务与人脸识别任务有相似的特征： 所有类别的图像结构较相似， 只有细微的差别(subtle difference)。 这是这两个任务与自然图像处理一个很明显的不同之处。因此， 虽然在自然图像识别的场景中， 主成分分析提取图像特征 未被证明是一个效果很好的方法，但是， 在眼底光学相干成像的图像中， 我们的实验证明， 这一方法依旧取得了有竞争性的分类效果。 
+
+        另一个采用主成分分析来提取图像特征的理由是， 主成分分析可以较好的重建图像， 且重建的图像在特征值张成的空间中。  这也是为什么我们没有采用“尺度不变的特征转换描述子”(SIFT descriptor) ~\cite{yang2009linear}和空间金字塔~\cite{lazebnik2006beyond} 或与池化(pooling)有关的方法，尽管他们在自然图像处理的传统方法中，很早就被证明是取得良好分类性能的几个要素。遗憾的是，他们都一定程度低破坏了空间信息，使得目前还没有很好的办法来重建图像。
+
+        一组特征向量可以看成构成该类图像的一组基，每一个特征向量可以可视化为像素空间的图像，所以我们也可以称这组特征向量为特征图像。~\cite{turk1991eigenfaces} 中将提取的特征图像称作"Eigen Face", 类似地，我们使用主成分分析计算得到的特征图像叫“Eigen OCT”。 下面我们给出具体的Eigen OCT的算法 ~\ref{alg:eigenOCT}  . 与给出一组Eigen OCT及其下的表示时重构OCT图像的算法~\ref{alg: pca_recon}。
+
+        我们在实现主成分分析的过程中，没有直接使用奇异值分解(SGD)的方法。因为在我们的应用场景下，有$wh \ll K$，且为了支持高分辨率的图像，（我们的方法中，$w = 512, h = 128$）$X\cdot X^T \in \mathbb{R}^{wh \times wh}$ 对该矩阵做奇异值分解是非常耗费计算量的计算。我们因此不直接计算$X\cdots  X^T$的特征值，而计算它的对应矩阵$X^T \cdot X \in \mathbb{R} ^{K \times K}$的特征值。 从推导~\ref{the:AB_BA}我们将看到， 这两者的特征值和特征向量有很好的对应关系。
+
+        \begin{theorem}\label{the:AB_BA}
+            $AB$ 与$BA$的特征值相同，且$AB$的特征向量$u_i$与$BA$的特征向量$v_i$有如下关系：$v_i = Bu_i$
+        \end{theorem}
+        \begin{proof}
+        % \begin{align*}
+        
+            因为 $u_i$是$AB$的特征向量，\\
+            所以  $AB \cdot u_i = \lambda_i \cdot u_i$\\
+            $\Leftarrow B\cdot AB u_i = B \lambda_i \cdots u_i$\\
+            $\Leftarrow BAB u_i = \lambda_i B u_i$\\
+            $\Leftarrow BA(Bu_i)= \lambda_i (Bu_i)$\\
+            因此 若$AB$有特征值$\lambda_i$和对应的特征值$u_i$，则$BA$有特征值$Bu_i$。
+        
+        % \end {align*}
+        \end{proof}
+
+
+        \begin{algorithm}[t]
+        \label{alg: eigenOCT}
+        \caption{主成分分析提取特征图像} %算法的名字
+        \hspace*{0.02in} {\bf 輸入:} %算法的输入， \hspace*{0.02in}用来控制位置，同时利用 \\ 进行换行
+        预处理后的训练数据$X \in \mathbb{R}^{wh \times N}$，每一列表示一张图像；降低的维数$K$ \\
+        \hspace*{0.02in} {\bf 输出:} %算法的结果输出
+        平均图像 $\mu \in \mathbb{R}^{mn\times 1}$，一组特征图像 $R \in \mathbb {mn \times K}$
+        \begin{algorithmic}[1]
+        \State 计算平均图像: $\mu \leftarrow \frac{1}{N} \sum_{i=1}^N x_i$ % \State 后写一般语句
+        \State 减去平均图像，使期望为0. $x_i \leftarrow x_i - \mu$
+        \State 计算协方差矩阵对应的矩阵$C'$： $C' \leftarrow X^T \cdot X$
+        \State 使用SGD分解法计算$C'$的特征向量 $R' = (r'_1, \dots, r'_n)$ 和特征值$\Lambda = (\lambda_1, \dots, \lambda_n)$
+        \State 取前K大的特征向量 $\bar{Lambda} = (\lambda_{m_1}, \dots, \lambda_{m_K})$ 以及他们所对应的特征值 $\bar {R'} = (r'_{m_1}, \dots, r'_{m_K})$
+        \State 计算协方差矩阵$C$的特征向量 $R = A \cdot \bar{R'}$
+
+        \State \Return $R$, $\mu$
+        \end{algorithmic}
+        \end {algorithm}
+
+        \begin{algorithm}[t]
+        \label{alg: pca_recon}
+        \caption{主成分分析重构原图像} %算法的名字
+        \hspace*{0.02in} {\bf 輸入:} %算法的输入， \hspace*{0.02in}用来控制位置，同时利用 \\ 进行换行
+        一个Eigen OCT下的表示 $\hat{x} \in \mathbb{R} ^{K} $,一组EigenOCT $R \in \mathbb{R} ^{wh \times K}$，和平均图像$\mu$，类别$c$\\
+        \hspace*{0.02in} {\bf 输出:} %算法的结果输出
+        重构图像$recon(\hat{x}, R, c, \mu)$
+        \begin{algorithmic}[1]
+            \State 选取需要的eigenOCT 及其表示 $R_c$， $\hat{x_c}$
+            \State $recon(\hat{x}, R, c, \mu) = R_c \hat{x_c} + \mu$
+        \end{algorithmic}
+        \end {algorithm}
+
+
+\section{标签一致的字典学习}
+\label{sec:lc-ksvd}
+    \subsection{动机}
+    虽然图像生存在高维空间中， 但是它们所占的空间， 只是高维空间中的一个流形的一小部分。目前已经有很多工作\textbf{cite} 已经表明，稀疏性是图像的自然特点。 而稀疏编码的方法很好的利用了稀疏性。 用一组很少量的元素来线性表示拟合输入信号。这组线性表示， 就成为稀疏编码。 这些元素， 被称作字典。 当字典的元素从数据集中计算的来而不是取固定的元素（比如傅里叶分解）时， 这类方法被成为字典学习。  利用稀疏编码和字典学习， 可以提高许多图像任务的表现，比如图像分类\cite{}，场景识别\cite{}，去噪声\cite{}等。  但是， \cite{}表示， 当字典学习时没有用到类别信息的时候，  在图像分类问题上的效果 不如有监督字典学习时的效果更好。 
+
+    在OCT图像病态定位的任务中，我们不仅希望得到该图像对应的一组稀疏编码， 还希望得到如何从这组稀疏编码中， 得到 它未病变前的稀疏表示。 这就要求我们 知道， 在原来的稀疏编码中， 哪些元素贡献了健康的因素 —— 在重建健康图像的时候我们要加强这部分； 哪些元素贡献了病变的因素 —— 在重建图像的时候， 就可以削弱这部分。  所以， 如果字典学习中得最后得到的字典元素， 有类别标签， 就很好的满足了任务要求。
+
+    下面，我们将首先介绍基本的KSVD字典学习算法，以及它的一种加速方法。 这是一套经典的字典学习方法，也是标签一致字典学习的基础。 然后， 在~\ref{sec:lc-ksvdAlg}中，  我们将介绍， 如何把标签信息加入到KSVD字典学习中，  得到一个每个元素都有类别标签的过完备字典\cite{jiang2013label}， 并使用该字典下的稀疏表示分类图像 。
+
+    \subsection{K-SVD字典学习与Batch-OMP加速} 
+    K-SVD方法 \cite{aharon2006rm}是一种非常高效的 数据驱动的 过完备字典的学习方法。  它要解决的问题是如下范式 
+
+    \begin{equation}
+        \min _{D, Y} \| X - DY \| ^2 , s.t. \| y_i \| _p \le K, \forall i
+    \end{equation}
+    在我们的方法中，$p = 0$。
+
+    \subsection{标签一致的字典学习的具体算法}
+    \label{sec:lc-ksvdAlg}
+    
+    我们的目标可以形式化表示为以下公式：
+    \begin{equation}
+    \begin{split}
+        (D, W) & = \mathop{\arg \min}_{D, W} \sum_i \mathcal{L} (c_i, f(y_i^*, W)) + \frac{\gamma}{2}\|W\| ^2
+        y_i \\
+        y_i^* & = \mathop{\arg \min}_{y_i} \|x_i - Dy_i\| ^2 s.t. \|y_i\| \le T
+    \end{split}
+    \end{equation}
+    这里，$X$是输入的原信号，在我们的任务中输入是上一步主成分分析后得到的主成分表示$\hat{X}$，$D $是一个过完备的字典，每一列是一个原子，列数就是字典数。 $y_i$是每个$x_i$在字典$D$下对应的稀疏表示。$f(y_i, W)$是一个分类器，它的输入是得到的稀疏表示，所有的参数表示为$W$。在标签一致的字典学习方法中，由于字典的元素有类标签，所以本身就有判别性，我们将发现，$f$是一个多类别的线性分类器，就可以取得较好的分类效果。 $c_i$是$x_i$的真实类标签。 $\mathcal{L}$是分类误差，这里采用二次误差:
+    \begin{equation}
+        \mathcal{L}(C, f(Y^*, W)) = \sum _i \|c_i - f(y_i^* , W) \| ^2 
+    \end{equation}
+    
+
+    % subsection subsection_name (end)
+
+\section{健康图像拟合与病态定位}
+\label{sec:norm-recon}
+    \subsection{从病态图像特征推测健康图像特征}
+    \subsection{从健康图像特征重建健康图像}
+
+
+
