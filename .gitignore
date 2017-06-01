@@ -3,6 +3,7 @@ node_modules
 dist
 .DS_Store
 *~
+*.synctex.gz
 *.aux
 *.bak
 *.bbl

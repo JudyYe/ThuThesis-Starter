@@ -146,21 +146,56 @@ sadf
     \subsection{标签一致的字典学习的具体算法}
     \label{sec:lc-ksvdAlg}
     
-    我们的目标可以形式化表示为以下公式：
+    如果$X$是输入的原信号即主成分分析后得到的特征表示；$D$是一个过完备字典，每一列称为一个原子(atom)，列数是字典大小；$Y$是在$D$下的原信号的稀疏表示；$W$表示分类器的所有参数部分。那么，结合分类与稀疏编码两步，本任务的目标可以形式化表示为以下形式：
     \begin{equation}
+    \label{alg:all-ksvd}
     \begin{split}
         (D, W) & = \mathop{\arg \min}_{D, W} \sum_i \mathcal{L} (c_i, f(y_i^*, W)) + \frac{\gamma}{2}\|W\| ^2
         y_i \\
-        y_i^* & = \mathop{\arg \min}_{y_i} \|x_i - Dy_i\| ^2 s.t. \|y_i\| \le T
+        y_i^* & = \mathop{\arg \min}_{y_i} \|x_i - Dy_i\| ^2 s.t. \|y_i\|_0 \le T
     \end{split}
     \end{equation}
-    这里，$X$是输入的原信号，在我们的任务中输入是上一步主成分分析后得到的主成分表示$\hat{X}$，$D $是一个过完备的字典，每一列是一个原子，列数就是字典数。 $y_i$是每个$x_i$在字典$D$下对应的稀疏表示。$f(y_i, W)$是一个分类器，它的输入是得到的稀疏表示，所有的参数表示为$W$。在标签一致的字典学习方法中，由于字典的元素有类标签，所以本身就有判别性，我们将发现，$f$是一个多类别的线性分类器，就可以取得较好的分类效果。 $c_i$是$x_i$的真实类标签。 $\mathcal{L}$是分类误差，这里采用二次误差:
+    其中， $y_i$是每个$x_i$在字典$D$下对应的稀疏表示。$c_i$是$x_i$的真实类标签。$f(y_i, W)$是一个分类器，它的输入是得到的稀疏表示$Y$。 $\mathcal{L}$是分类误差，这里采用二次误差（quatric loss）:
     \begin{equation}
         \mathcal{L}(C, f(Y^*, W)) = \sum _i \|c_i - f(y_i^* , W) \| ^2 
     \end{equation}
-    
+    在标签一致的字典学习方法中，由于字典的元素有类标签，所以本身就有判别性，本文发现，当$f$仅是一个多类别的线性分类器，就可以取得较好的分类效果。
 
-    % subsection subsection_name (end)
+    下面将分别介绍，如何把类别一致的限制和分类误差限制分别加入学习过程中。
+
+    \subsection{标签一致限制与分类限制}
+    标签一致的含义是，希望相同类别的训练样本的稀疏表示尽量相似，而不同类别的训练样本的稀疏表示尽量不同。在这里，本算法把训练样本的标签信息集中在Q中。结合标签一致的含义，得到含有标签限制的稀疏编码与字典学习目标公式：
+    \begin{equation}
+    \label{alg:lc-ksvd1}
+    (D, A, Y) = \mathop{\arg \min} _{D, A, Y} \|X - DY\| ^ 2 + \alpha\|Q - AX\|^2 s.t. \forall i, \|y_i\|_0 \le T
+    \end{equation}
+
+     $Q\in \mathbb{R}^{d \times N}$ $d$字典大小，$N$训练样本数。$q_i, i = 1, \dots N$的形式是$(0, \dots 1, \dots, 1, \dots 0)$当且仅当训练样本j与字典第i个原子的标签类别别相同时，取1，否则取0。注意，如果保持每次更新，都使字典的原子有一个相同的标签，那么在任何时刻，字典的每个原子都会有一个相同唯一的类别标签。$\alpha $标签一致限制的权重参数。
+
+    由于KSVD算法不能直接优化$D, Y$，所以，算法引入线性变换$A$，使得将原本的稀疏编码映射到$AX$，使得$AY$与$Q$的标签一致目标接近。最后，将$AY$作为标签一致的稀疏编码。
+
+
+
+    现在将分类误差加入目标~\ref{alg:lc-ksvd1}
+    \begin{equation}
+    \label{alg:lc-ksvd2}
+    (D, A, Y, W) = \mathop{\arg \min} _{D, A, Y, W} \|X - DY\| ^ 2 + \alpha\|Q - AX\|^2 + \beta\|C - WY\|^2 s.t. \forall i, \|y_i\|_0 \le T
+    \end{equation}
+    $C\in \mathbb{R}^{n_c \times N}$是训练样本的真实类别标签，如果样本j属于类别i， 那么C的第j列中，只有第i列是1，其余全是0. $\beta$是分类限制子的权重参数。
+
+    \subsection{整合限制至KSVD}
+    注意到最终算法的目标中没有$A$。上文已经讨论过，$A$是为了在KSVD优化算法中成功引入标签一致限制而加入的中间量。算法的最终表述要去掉$A$的作用。上一小节已经为我们提供了思路，假设$A$可逆，那么：$Y' = AY, D' = D A^{-1} W' = W A^{-1}$ 折叠$A$后的目标方程表示如下：
+    \begin{equation}
+    \label{alg:lc-ksvd3}
+    (D', Y', W') = \mathop{\arg\min}_{D', Y', W'} \| X - D'Y'\|^2 + \alpha \|Q - Y'\| ^2 + \beta\|C - W' Y' \| ^2 s.t. \forall i, \|y_i\|_0 \le T 
+    \end{equation}
+
+    将学习字典与编码项、标签一致限制项、分类限制项三者整合成矩阵形式，则式子~\ref{alg:lc-ksvd3}等价于
+    \begin{equation}
+    \begin{split}
+    & (D, A, Y, W) = \mathop{\arg\min}_{D, A, Y, W} \left\|\begin{pmatrix} Y \\ \sqrt{\alpha} Q \\ \sqrt{\beta}H\end{pmatrix} - \begin{pmatrix} D \\ \sqrt{\alpha} A \\ \sqrt{\beta}W\end{pmatrix} Y\right\| ^2 s.t. \forall i, \|x_i\|_0 \le T
+    \end{split}
+    \end{equation}
 
 \section{健康图像拟合与病态定位}
 \label{sec:norm-recon}
