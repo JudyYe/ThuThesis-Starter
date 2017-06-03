@@ -1,25 +1,33 @@
 \chapter{实验评估}
 
-\section{数据说明}
+    本章将展示上一章阐述方法的实验结果。对总体性能进行评估，对关键步骤进行考察，对典型图像进行展示。我们将分为视觉(~\ref{sec:visualize}节)和定量(~\ref{sec:analyze}节)两种方式分别评价异常定位和分类的性能，然后，我们将深入模型，解释讨论在学习过程中，模型学习到的信息(\ref{sec:lookInto}节)。在此之前，本章将先说明实验的数据集和实验环境。
+
+\section{数据和环境说明}
+    \label{sec:data}
     \subsection{数据集说明} % (fold)
-    \subsection{数据预处理}
-    \subsection{数据后处理}
+    本实验共包含两个数据集。第一个是杜克大学\cite{srinivasan2014fully}收集的公开数据集。它包含45名去身份化的被试，15名正常被试，15名患有AMD的被试，以及15名有DME病症的被试。
+    % \subsection{数据预处理}
+    % \subsection{数据后处理}
+    \subsection{实验环境}
 
 % subsection subsection_name (end)
 
-\section{环境}
-    \subsection{评价指标}
-    \subsection{实验环境}
+% \section{环境}
+%     \label{sec:environment}
+%     \subsection{评价指标}
 
 \section{视觉评估}
+    \label{sec:visualize}
     \subsection{异常定位}
     \subsection{}
 
 \section{定量评估}
+    \label{sec:analyze}
     \subsection{分类}
     \subsection{重建图像误差}
 
 \section{理解模型}
+    \label{sec:lookInto}
     \subsection{PCA降维}
     \subsection{参数选取}
     \subsection{字典学习}
