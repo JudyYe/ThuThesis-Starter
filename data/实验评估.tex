@@ -171,7 +171,7 @@
     \subsection{PCA降维}
     % PCA的Coeff图
     主成分分析求得的特征向量方向，是数据集上数据分布变化最大的方向，且相互正交。可视化最大的10个特征值所对应的特征向量如图~\ref{fig:pca-coeff}
-    \begin{figure}[H] % use float package if you want it here
+    \begin{figure}[h] % use float package if you want it here
       \centering
       \includegraphics[width=\textwidth]{base}
       \caption[PCA特征向量]{主成分分析最大的10个特征值对应的特征向量}
@@ -181,7 +181,7 @@
 
     另一方面，观察在这组特征值下的系数，把该类的所有系数表示在一张茎叶图中，如图~\ref{fig:pca-stem}。有两个观察，首先，在这些方向上的投影分布，如理论，有明显的由大到小的趋势；其次，可以看到，每一类的系数分布略有不同。从一个侧面说明，PCA提取的特征向量也有一定的判别性。
 
-    \begin{figure}[H] % use float package if you want it here
+    \begin{figure}[h] % use float package if you want it here
       \centering
       \includegraphics[width=\textwidth]{pca-score}
       \caption[PCA系数分布]{主成分分析最大的30个特征值对应的特征向量上的投影分布。红色代表NOR类，绿色代表AMD类，蓝色代表DME类。}
@@ -189,7 +189,7 @@
     \end{figure}
 
     最后，展示主成分分析得到的平均位移图像。这个图像是健康，老年黄斑变性，糖尿病性黄斑水肿三类图像求平均值所得。仍然可以隐约看到完整视网膜成像的结构，平均位移图像形态较为清晰整齐，可以隐约看到视网膜黄斑区中心凹，隐约看到上皮层和血管层间的分界层的亮纹。如上说明，数据预处理，对齐降噪，裁剪等步骤起了较好的效果。
-    \begin{figure}[H] % use float package if you want it here
+    \begin{figure}[h] % use float package if you want it here
       \centering
       \includegraphics[width=\textwidth]{pca-mean}
       \caption[PCA平均位移图像]{可见黄斑区中心凹，可见大致轮廓，可见不同层交接处的亮纹。}
@@ -201,7 +201,7 @@
     % 字典图
     可视化学习到的字典原子，每一类随机选取了9个原子并重建到像素空间中，如图~\ref{fig:dl-dict}。注意到，虽然训练在学习过程中是一起训练的，所有原子的训练数据是全部类别的训练样本，但是，由于标签一致的限制条件，使得字典的每个原子有标签，因此，每一类字典原子都能看到与其它类别的原子的显著区别。
 
-    \begin{figure}[H]
+    \begin{figure}[h]
       \centering%
       \subcaptionbox{NOR\label{fig:dl-nor}}[\textwidth] %标题的长度，超过则会换行，如下一个小图。
         {\includegraphics[width=\textwidth]{dict-nor}} \\
@@ -217,7 +217,7 @@
 
     观察稀疏编码系数的直观表示，把每类图像的每一个样本提取的稀疏系数画在同一个坐标轴上，可以观察到，不同类别的稀疏系数有明显区别，真实类别倾向于使用具有该类别标签的原子表示。对比图~\ref{fig:pca-stem}，发现字典学习一步得到的特征表示，不同类之间的区别性大很多。除此，主成分分析中方差则由大至小递减较明显，这一性质不利于分类器分类。在稀疏编码之后，我们发现，每一维上的稀疏分布方差几乎相等，从而克服了如上问题。
 
-    \begin{figure}[H]
+    \begin{figure}[h]
       \centering%
       \includegraphics[width = 0.75\textwidth]{dl-allsc}
       \caption[稀疏表示分布]{红色表示NOR，绿色表示AMD，蓝色表示DME。每一类的分布模式差别较大，都倾向于使用真实所属类别的原子编码自己。同时，不同维数的方差相较主成分分析投影结果平均很多，有利于分类。}
@@ -229,7 +229,7 @@
     研究表明，稀疏性是图像分布的自然属性，可以借助于此提高图像识别等任务的表现。因此，理解模型时希望直观比较特征向量的稀疏程度。
 
     图~\ref{fig:sc-pca}是对一张随机样本，在进行主成分分析之后，把前180维特征向量方向上的投影长度画在了茎叶图上。发现，虽然通过主成分分析维数降低了，但是并没有特征的稀疏性。
-    \begin{figure}[H]
+    \begin{figure}[h]
       \centering%
       \includegraphics[width = \textwidth]{pca-sc}
       \caption{PCA投影分布}
@@ -239,7 +239,7 @@
     标签一致的字典学习与稀疏编码之后，得到的稀疏系数使用同样的方法在茎叶图上表示。仅对每一类其中一个样本的系数茎叶图进行展示，如图~\ref{fig:sc-dict}。蓝色部分是提取特征向量得到的$y_i$，字典里所有原子都参与了优化问题。发现相比于主成分分析后的特征，稀疏编码得到的$y_i$要稀疏很多，且非0部分基本集中在有相同标签的字典原子上。红色部分是利用$D^{normal}$重构的$y^{normal}_i$。这里放松了稀疏限制，但发现，求解所得的表示仍然相较于主成分分析特征~\ref{fig:sc-pca}中的表示更稀疏。且，原来的表示中非0的点，通常在拟合健康特征的时候，该部分特征得到了增强。 
 
     % 稀疏的stem图
-    \begin{figure}[H]
+    \begin{figure}[h]
       \centering%
       \subcaptionbox{NOR\label{fig:sc-nor}}[0.3\textwidth] %标题的长度，超过则会换行，如下一个小图。
         {\includegraphics[width=0.3\textwidth]{sc-nor}} 
