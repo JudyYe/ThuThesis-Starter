@@ -30,7 +30,7 @@
     \textbf{图像分类与稀疏编码}
     在稀疏编码中的假设是，高维度的图片分布在稀疏的低维空间中，并且在低维空间中，有较好的线性性质。我们认为，应用稀疏编码可以得到更代表本质特征的表示。同时，我们又假设，一类图像信号的稀疏表示，可以表示成一些基本元素的集合，这些元素构成了过完全的字典(over-complete)，而一类图像的稀疏系数，只需要字典中的一些元素就可以表示。在字典学习中，有两大类方法：预定义的字典和数据驱动的字典。前者的字典元素被提前定义好的，如小波集合，傅里叶集合等；后者的字典元素是从训练数据中学习得到的。
 
-    在当前的图像处理领域，图像稀疏表示(sparse coding)与字典学习(dictionary learning)不断在模式识别(pattern recognition)机器学习（machine learning），计算机视觉（computer vision）和医学视觉（medical vision）上取得新进展。在人脸识别\cite{zhang2010discriminative,wright2009robust}，场景分类\cite{lazebnik2006beyond,gao2010kernel}等领域，运用判别式字典(discriminative dictionary)，流行学习(manifold learning)，稀疏编码等方法，不断取得新的效果。根据观察，除了普遍物体分类，医学OCT图像分析还可以参考人脸检测的方法，因为OCT高度结构化的特征。
+    在当前的图像处理领域，图像稀疏编码(sparse coding)与字典学习(dictionary learning)不断在模式识别(pattern recognition)机器学习（machine learning），计算机视觉（computer vision）和医学视觉（medical vision）上取得新进展。在人脸识别\cite{zhang2010discriminative,wright2009robust}，场景分类\cite{lazebnik2006beyond,gao2010kernel}等领域，运用判别式字典(discriminative dictionary)，流行学习(manifold learning)，稀疏编码等方法，不断取得新的效果。根据观察，除了普遍物体分类，医学OCT图像分析还可以参考人脸检测的方法，因为OCT高度结构化的特征。
 
 
 
@@ -44,7 +44,7 @@
 
 
     \subsection{基于有监督字典学习的分类技术}
-    字典学习和稀疏编码的动机在于最小化重建误差，并最早应用于图像重建，图像降噪等方向，取得了较好的效果。同时，字典学习与稀疏编码近来也发现在分类问题上可以取得较好的效果。但是，在分类任务中的目标，则转变成，学习有区分度的词典和对应的稀疏表示使得不同类别之间有尽量大的区分度。因而产生了“判别式字典学习”(discriminative dictionary learning)的学习技术，在学习时引入类别标记(label)。我们称之为，有监督的字典学习和稀疏编码(S-DLSR, supervised dictionary learning and sparse representation)，以提升稀疏编码在分类任务中的效果。我们根据\inlinecite{gangeh2015supervised}中的分类方法，将有监督的字典学习和稀疏编码技术分为以下六类： 1）每一类学习一个字典\cite{wright2009robust,yang2010metaface} 2）无监督学习字典后做有监督的调整\cite{fulkerson2008localizing,winn2005object} 3）联合学习字典与分类器\cite{mairal2008discriminative,jiang2013label,zhang2010discriminative,pham2008joint,yang2008unifying}4）嵌入类别标签的字典学习5）嵌入稀疏表示的字典学习\cite{huang2006sparse,yang2011fisher,rodriguez2008sparse} \cite{gangeh2013kernelized,zhang2013simultaneous,lazebnik2009supervised}6）字典元素直方图的学习。\cite{lian2010probabilistic,zhang2009learning}
+    字典学习和稀疏编码的动机在于最小化重建误差，并最早应用于图像重建，图像降噪等方向，取得了较好的效果。同时，字典学习与稀疏编码近来也发现在分类问题上可以取得较好的效果。但是，在分类任务中的目标，则转变成，学习有区分度的字典和对应的稀疏表示使得不同类别之间有尽量大的区分度。因而产生了“判别式字典学习”(discriminative dictionary learning)的学习技术，在学习时引入类别标记(label)。我们称之为，有监督的字典学习和稀疏编码(S-DLSR, supervised dictionary learning and sparse representation)，以提升稀疏编码在分类任务中的效果。我们根据\inlinecite{gangeh2015supervised}中的分类方法，将有监督的字典学习和稀疏编码技术分为以下六类： 1）每一类学习一个字典\cite{wright2009robust,yang2010metaface} 2）无监督学习字典后做有监督的调整\cite{fulkerson2008localizing,winn2005object} 3）联合学习字典与分类器\cite{mairal2008discriminative,jiang2013label,zhang2010discriminative,pham2008joint,yang2008unifying}4）嵌入类别标签的字典学习5）嵌入稀疏表示的字典学习\cite{huang2006sparse,yang2011fisher,rodriguez2008sparse} \cite{gangeh2013kernelized,zhang2013simultaneous,lazebnik2009supervised}6）字典元素直方图的学习。\cite{lian2010probabilistic,zhang2009learning}
     它们的区别主要在于判别字典的原子是否有强类别标签。本文采用的方法是第三类\cite{jiang2013label}的方法，它的主要优点在于，共同学习分类器和字典，提升分类准确率，另外，每一个原子都有一个类别标签，可以根据这个特性来“操纵”特征表示，该方法在人脸识别任务上取得了最好方法。后面的分析我们将发现，人脸识别跟OCT图像有很多相似的地方。
 
 \section{创新点}
@@ -54,5 +54,3 @@
         \item 对于因为缺少真实标注而定量评价算法性能的问题，给出了一种合理的替代方法。
         \item 这是在眼底黄斑区OCT成像领域，极少的一篇关于病态定位问题的研究。
     \end{enumerate}
-
-    下面将展开算法流程。

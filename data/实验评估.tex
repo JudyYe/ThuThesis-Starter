@@ -2,7 +2,7 @@
 
     本章将展示上一章阐述方法的实验结果。对总体性能进行评估，对关键步骤进行考察，对典型图像进行展示。我们将分为视觉(~\ref{sec:visualize}节)和定量(~\ref{sec:analyze}节)两种方式分别评价异常定位和分类的性能，然后，我们将深入模型，解释讨论在学习过程中，模型学习到的信息(\ref{sec:lookInto}节)。在此之前，本章将先说明实验的数据集和实验环境。
 
-\section{数据和环境说明}
+\section{数据说明与实现细节}
     \label{sec:data}
     \subsection{数据集说明} % (fold)
     本实验共包含两个数据集。第一个是杜克大学\cite{srinivasan2014fully}收集的公开数据集。它包含45名去身份化的被试，15名正常被试，15名患有AMD的被试，以及15名有DME病症的被试。对每一名被试的视网膜中心区进行扫描成像，再从扫描像中挑选若干张较有区分度的图像加入杜克数据集中。第二个数据集是北京医院数据集，本实验室与北京医院合作，获取一批临床数据。该批数据的每张图片，都采集于不同患者的视网膜。
@@ -21,12 +21,33 @@
         \end{tabularx}
     \end{table}
 
+    \subsection{实现细节}
+
+    本实验使用MATLAB语言，在MATLAB2014b上运行通过。本实验的算法瓶颈在标签一致的字典学习过程。目前本算法不支持多线程运行。
+
+    在表~\ref{tab:param}中列出了算法中的关键参数。在杜克大学数据集上采用交叉验证的方法，对这些参数进行选取，加粗参数的组合是在杜克大学数据集上取得最好效果的参数组合。后文如果没有特殊说明，默认的参数设置为粗体参数。
+    \begin{table}[htb]
+        \centering
+        \caption[关键参数选取]{关键参数选取。黑体表示默认选取参数}
+        \label{tab:param}
+        \begin{tabularx}{.6\linewidth}{XX}
+            \toprule[1.5pt]
+            {\heiti 参数} & {\heiti 取值范围} \\\midrule[1pt]
+            主成分分析维数 & 120,300,\textbf{811} \\
+            字典大小 & 50, 150, 1200, \textbf{1500}, 6000 \\
+            稀疏限制 $T$ & 5, \textbf{10}, 30  \\
+            标签一致限制权重$\alpha$ &0.001, \textbf{0.01}, 0.1, 1\\
+            分类限制权重 $\beta$ &0.001,0.01,\textbf{0.1},1\\
+            迭代次数 &\textbf{50}, 100\\
+            \bottomrule[1.5pt]
+        \end{tabularx}
+    \end{table}
 
 
     % \subsection{数据预处理}
     % \subsection{数据后处理}
-    \subsection{实验环境}
-    本实验使用MATLAB语言，在MATLAB2014b上运行通过。其中，0范数下的优化问题使用了~\inlinecite{lee2007efficient}提出的快速算法。针对本应用场景的主要问题是内存空间不足，笔者对程序的空间使用进行了优化，比如主成分分析算法使用了上一章接介绍的改进算法来适应高维矩阵，或调整矩阵乘法降低计算复杂度等。本实验的算法瓶颈在标签一致的字典学习过程。目前本算法不支持多线程运行。
+    % \subsection{实验环境}
+    % 本实验使用MATLAB语言，在MATLAB2014b上运行通过。其中，0范数下的优化问题使用了~\inlinecite{lee2007efficient}提出的快速算法。针对本应用场景的主要问题是内存空间不足，笔者对程序的空间使用进行了优化，比如主成分分析算法使用了上一章接介绍的改进算法来适应高维矩阵，或调整矩阵乘法降低计算复杂度等。本实验的算法瓶颈在标签一致的字典学习过程。目前本算法不支持多线程运行。
 
 % subsection subsection_name (end)
 
@@ -90,7 +111,7 @@
     汇报在两个数据集上的分类准确率。北京医院数据集是一个较小的数据集，本实验中使用了 两种训练集测试集的划分。在第一种划分中，取2/3数据做训练集，剩余做测试集，同样进行交叉验证。第二种划分，测试集每类随机选取30个，其余做训练集，进行交叉检验。得到各类识别准确率表~\ref{tab:clf-beijing}.表中，mAP表示平均准确率(mean Accuracy Performance)，分别将提取的特征向量使用1.标签一致的字典学习中习得的线性分类器 2.支持向量机 两种分类器进行分类。“(2/3+1/3)”表示第一种数据集划分，“(x+30)”表示第二种数据集划分。
     \begin{table}[htb]  
         \centering
-        \caption{北京医院数据集}
+        \caption{北京医院数据集分类结果}
         \label{tab:clf-beijing}
         \begin{tabularx}{.75\linewidth}{lXXXX}
             \toprule[1.5pt]
@@ -120,7 +141,7 @@
         \centering
         \caption{PCA维数选取}
         \label{tab:pca-dim}
-        \begin{tabularx}{.75\textwidth}{lXXXX}
+        \begin{tabularx}{.4\textwidth}{lXXXX}
             \toprule[1.5pt]
             {\heiti $S_k$} &  0.80 & 0.85 & 0.90 &0.95 \\\midrule[1pt]
             {\heiti $k$} & 98 &161 & 345 & 811\\
@@ -134,7 +155,7 @@
         \centering
         \caption[参数选取]{参数选取。主成分分析降维维数与字典大小}
         \label{tab:pca-dim}
-        \begin{tabularx}{.75\textwidth}{XX}
+        \begin{tabularx}{.5\textwidth}{Xr}
             \toprule[1.5pt]
             PCA=120, 字典大小=150 & mAP = 0.911\\
             PCA=120, 字典大小=1500 & mAP = 0.921\\\midrule[1pt]
@@ -152,7 +173,7 @@
         \centering
         \caption{重建图像平均误差}
         \label{tab:recon}
-        \begin{tabularx}{.75\linewidth}{lXXX}
+        \begin{tabularx}{.65\linewidth}{lXXX}
             \toprule[1.5pt]
             {\heiti 文件名} & {\heiti NOR} & {\heiti AMD} & {\heiti DME}\\\midrule[1pt]
             主成分分析(all) &7.54 &7.41 &7.41\\
@@ -166,7 +187,7 @@
 
 \section{理解模型}
     \label{sec:lookInto}
-    在前面的章节，我们从定量和定性两个角度证明了本工作中算法的有效性，并证明了算法动机中对特征向量提出的特性：去相关性、判别性、可逆性。与此同时，我们还希望理解，在学习过程中，不同的构件分别学到了何种知识。这是一个难以回答的问题，本节用可视化的方法，试图剖析这个问题，深入模型内部，理解学习过程。同时，在窥探模型的过程中，进一步印证特征向量符合三条特性。在~\ref{sec:param}小节中，列出了主要参数的选取和理由。
+    在前面的章节，我们从定量和定性两个角度证明了本工作中算法的有效性，并证明了算法动机中对特征向量提出的特性：去相关性、判别性、可逆性。与此同时，我们还希望理解，在学习过程中，不同的构件分别学到了何种知识。这是一个难以回答的问题，本节用可视化的方法，试图剖析这个问题，深入模型内部，理解学习过程。同时，在窥探模型的过程中，进一步印证特征向量符合三条特性。
 
     \subsection{PCA降维}
     % PCA的Coeff图
@@ -183,7 +204,7 @@
 
     \begin{figure}[h] % use float package if you want it here
       \centering
-      \includegraphics[width=\textwidth]{pca-score}
+      \includegraphics[width=.6\textwidth]{pca-score}
       \caption[PCA系数分布]{主成分分析最大的30个特征值对应的特征向量上的投影分布。红色代表NOR类，绿色代表AMD类，蓝色代表DME类。}
       \label{fig:pca-stem}
     \end{figure}
@@ -191,7 +212,7 @@
     最后，展示主成分分析得到的平均位移图像。这个图像是健康，老年黄斑变性，糖尿病性黄斑水肿三类图像求平均值所得。仍然可以隐约看到完整视网膜成像的结构，平均位移图像形态较为清晰整齐，可以隐约看到视网膜黄斑区中心凹，隐约看到上皮层和血管层间的分界层的亮纹。如上说明，数据预处理，对齐降噪，裁剪等步骤起了较好的效果。
     \begin{figure}[h] % use float package if you want it here
       \centering
-      \includegraphics[width=\textwidth]{pca-mean}
+      \includegraphics[width=.5\textwidth]{pca-mean}
       \caption[PCA平均位移图像]{可见黄斑区中心凹，可见大致轮廓，可见不同层交接处的亮纹。}
       \label{fig:pca-mean}
     \end{figure}
