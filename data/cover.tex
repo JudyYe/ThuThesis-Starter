@@ -15,28 +15,28 @@
   % 中文信息
   %=========
   ctitle={基于有监督字典学习的OCT图像分类和异常定位},
-  cdegree={工学硕士},
+  cdegree={工学学士},
   cdepartment={计算机科学与技术系},
   cmajor={计算机科学与技术},
   cauthor={叶雨菲},
-  csupervisor={孙延奎教授},
+  csupervisor={孙延奎副教授},
   % cassosupervisor={陈文光教授}, % 副指导老师
   % ccosupervisor={某某某教授}, % 联合指导老师
   % 日期自动使用当前时间，若需指定按如下方式修改：
   % cdate={超新星纪元},
   %
   % 博士后专有部分
-  cfirstdiscipline={计算机科学与技术},
-  cseconddiscipline={系统结构},
-  postdoctordate={2009年7月——2011年7月},
-  id={编号}, % 可以留空： id={},
-  udc={UDC}, % 可以留空
-  catalognumber={分类号}, % 可以留空
-  %
+  % cfirstdiscipline={计算机科学与技术},
+  % cseconddiscipline={系统结构},
+  % postdoctordate={2009年7月——2011年7月},
+  % id={编号}, % 可以留空： id={},
+  % udc={UDC}, % 可以留空
+  % catalognumber={分类号}, % 可以留空
+  % %
   %=========
   % 英文信息
   %=========
-  etitle={An Introduction to \LaTeX{} Thesis Template of Tsinghua University v\version},
+  etitle={OCT image classification and abnormalities localisation using supervised dictionary v\version},
   % 这块比较复杂，需要分情况讨论：
   % 1. 学术型硕士
   %    edegree：必须为Master of Arts或Master of Science（注意大小写）
@@ -52,11 +52,11 @@
   % 4. 专业型博士
   %    edegree：“填写专业学位英文名称全称”
   %    emajor：不填写此项
-  edegree={Doctor of Engineering},
+  edegree={Bachelor of Engineering},
   emajor={Computer Science and Technology},
-  eauthor={Xue Ruini},
-  esupervisor={Professor Zheng Weimin},
-  eassosupervisor={Chen Wenguang},
+  eauthor={Yufei Ye},
+  esupervisor={Associate Professor Yankui Sun},
+  % eassosupervisor={Chen Wenguang},
   % 日期自动生成，若需指定按如下方式修改：
   % edate={December, 2005}
   %
@@ -67,7 +67,7 @@
 
 % 定义中英文摘要和关键字
 \begin{cabstract}
-   近年来眼底黄斑区的光学相干成像图像处理研究在图像分类和图像分割两方面都取得了较好的进展。但是，图像分类只输出类别标签，对于医疗系统而言缺乏推断依据；图像分割只能针对底层语义信息进行处理，分割视网膜层。本工作在病态分类的基础上输出基于位置空间的病态信息。本工作给出了在中等规模数据集上，且没有像素级的位置信息监督信号下，利用类别信息监督，推断病变位置的方法。在数据预处理后，先经过主成分分析降维、去相关性，然后通过有监督的字典学习和稀疏编码提取主成分的特征表示。在得到的表示上使用线性分类器就可以取得有竞争力的分类效果，同时，通过在特征空间进行拟合，寻找健康成分的特征向量后，再重新投影到像素空间中。拟合生成的健康图像与原病态图像在较高分辨率的像素空间可以直接做减法，得到合理的病态位置推断。本工作在定量评估和视觉评估两方面证明了本方法的有效性。
+   本工作给出了在中等规模眼底视网膜OCT数据集上，在没有像素级的位置信息监督信号下，利用类别信息监督，推断病变位置的方法。近年来眼底黄斑区的光学相干成像图像处理研究在图像分类和图像分割两方面都取得了较好的进展。但是，图像分类只输出类别标签，对于医疗系统而言缺乏推断依据；图像分割研究大多针对底层语义信息，比如分割视网膜层。本工作在病态分类的基础上输出基于位置空间的病态信息。在数据预处理后，先经过主成分分析降维、去相关性，然后通过有监督的字典学习和稀疏编码提取主成分的特征表示。在得到的表示上使用线性分类器就可以取得有竞争力的分类效果，同时，通过在特征空间进行拟合，寻找健康成分的特征向量后，再重新投影到像素空间中。拟合生成的健康图像与原病态图像在较高分辨率的像素空间可以直接做减法，得到合理的病态位置推断。本工作在定量评估和视觉评估两方面证明了本方法的有效性。
 
 \end{cabstract}
 
@@ -75,7 +75,8 @@
 \ckeywords{光学相干成像, 有监督的字典学习, 稀疏编码, 弱监督的图像分割}
 
 \begin{eabstract}
-  In recent years, it has achieved great progress in the tasks of classification and segmentation in retina optical coherence tomography(OCT) images. However, the output of a classifier only predicts image-level labels while the medical systems requires the prediction process. Nevertheless, the segmentation of OCT images mostly focuses on low level visual clues, such as segmenting RPE layers. This work predicts a label as well as a pixel-wise illness score map. It is designed for the middle dataset where only image-level annotations are available, which is called the weakly supervised segmentation. The method extracts princepal componnet over the high-resolution preprocessed images to reduce dimension and correlation.  Then a dictionary is trained on the scores of PCA,  with which the image represeentation is obtained by sparse coding. With the spare representation, only a linear classfier can achieve competitive classification  performance. Meanwhile, we regress on the representation space to find the projection in the normal subspace of representation. The method projects the point back into the pixel space to reconstruct possible normal images. The residual between the reconstruction and the original becomes the abnormal spatial prediction. We valid the method in visual and quantitative analysis.
+    In recent years, it has achieved great progress in the tasks of classification and segmentation in retinal optical coherence tomography(OCT) images. However, the output of a classifier only predicts image-level labels while the medical systems require the prediction process. Nevertheless, the segmentation of OCT images mostly focuses on low-level visual clues, such as segmenting RPE layers. This work predicts a label as well as a pixel-wise illness score map. It is designed for the middle dataset where only image-level annotations are available, which is called the weakly supervised segmentation. The method extracts principal component over the high-resolution preprocessed images to reduce dimension and correlation.  Then a dictionary is trained on the scores of PCA,  with which the image representation is obtained by sparse coding. With the spare representation, only a linear classifier can achieve competitive classification performance. Meanwhile, we regress on the representation space to find the projection in the normal subspace of representation. The method projects the point back into the pixel space to reconstruct possible normal images. The residual between the reconstruction and the original becomes the abnormal spatial prediction. We valid the method in the visual and quantitative analysis.
+
 
 \end{eabstract}
 
